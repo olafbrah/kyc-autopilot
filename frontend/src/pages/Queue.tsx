@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import { can, useMe } from "../App";
 import type { Me, Row, Stats } from "../types";
-import { REASON_LABEL, StatusBadge, TierBadge, Stat, ago, pct } from "../ui";
+import { REASON_LABEL, StatusBadge, ScreeningBadge, Stat, ago, pct } from "../ui";
 
 const TABS: { key: string; label: string; count?: (c: Record<string, number>, qa: number) => number }[] = [
   { key: "needs_review", label: "Needs review", count: (c) => c.needs_review ?? 0 },
@@ -60,7 +60,7 @@ export default function Queue() {
       <div className="page-head">
         <div>
           <h1>Review queue</h1>
-          <p className="lede">The agent clears low-risk applicants. Everything it isn't sure about lands here.</p>
+          <p className="lede">The agent clears applicants that pass screening. Everything it isn't sure about lands here.</p>
         </div>
       {can(me, "agent:admin") && (
         <button className="primary" onClick={simulate} disabled={busy}>
@@ -98,7 +98,7 @@ export default function Queue() {
             <tr>
               <th>Applicant</th>
               <th>Nationality</th>
-              <th>Risk</th>
+              <th>Screening</th>
               <th>Status</th>
               <th>Agent</th>
               <th>Assignee</th>
@@ -119,7 +119,7 @@ export default function Queue() {
                   <div className="sub">{r.external_id}</div>
                 </td>
                 <td>{r.nationality}</td>
-                <td><TierBadge tier={r.risk_tier} /></td>
+                <td><ScreeningBadge tier={r.risk_tier} /></td>
                 <td>
                   <StatusBadge status={r.status} />
                   {r.qa_status && <div className="sub">QA {r.qa_status}</div>}

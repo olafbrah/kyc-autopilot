@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useMe } from "../App";
 import type { Detail } from "../types";
-import { Badge, REASON_LABEL, StatusBadge, TierBadge, blockerLabel, pct } from "../ui";
+import { Badge, REASON_LABEL, StatusBadge, ScreeningBadge, blockerLabel, pct } from "../ui";
 
 const CHECK_LABEL: Record<string, string> = {
   sanctions: "Sanctions screening",
@@ -65,7 +65,7 @@ export default function Application() {
       <div className="title-row">
         <h1>{d.full_name}</h1>
         <StatusBadge status={d.status} />
-        <TierBadge tier={d.risk_tier} />
+        <ScreeningBadge tier={d.risk_tier} />
         <span className="muted">{d.external_id}</span>
       </div>
       {error && <div className="error">{error}</div>}
@@ -103,6 +103,7 @@ export default function Application() {
 
           <section className="card">
             <h2>Automated checks</h2>
+            <p className="small muted">Stand-ins for vendor screening and document verification. The watchlist, country lists and thresholds are illustrative.</p>
             <table className="table compact">
               <tbody>
                 {Object.entries(d.checks).map(([k, c]) => (

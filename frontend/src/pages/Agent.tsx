@@ -92,7 +92,7 @@ export default function Agent() {
           <section className="card">
             <h2>Controls</h2>
             <p className="small muted">
-              The agent can only clear a case when every automated check is clear, the risk tier is low, it recommends approve
+              The agent can only clear a case when every automated check is clear, it recommends approve
               with confidence at or above the threshold, and no instructions are found in applicant text. This rule is enforced
               by the API, not the model.
             </p>

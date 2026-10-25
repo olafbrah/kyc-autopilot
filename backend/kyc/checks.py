@@ -1,7 +1,8 @@
 """Deterministic KYC checks. Code decides what code can decide; the model only sees the results.
 
 Each check returns {"status": "clear" | "info" | "review" | "fail", "detail": str, ...}.
-Risk tier: any fail -> high, any review -> medium, else low. Only low-tier cases can ever be auto-cleared.
+Risk tier: any fail -> high, any review -> medium, else low (shown in the UI as the screening result Hit / Needs review /
+Clear). It summarises the checks; it is not a customer risk rating. Only low-tier cases can ever be auto-cleared.
 """
 import json
 import re

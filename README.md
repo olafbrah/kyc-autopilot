@@ -10,7 +10,7 @@ automated decision is explainable, auditable, and gated by an eval.
 
 ```
 onboarding ──POST /api/applications──► API (FastAPI) ──► Postgres
-                                        │  deterministic checks → risk tier
+                                        │  deterministic checks → screening
                                         │  jobs table (SKIP LOCKED queue)
 agent worker(s) ──lease / ai-review──►  │  server-side auto-clear rule
   └─ LLM (simulated | OpenAI-compatible)│
@@ -53,7 +53,9 @@ cd frontend && npm install && npm run dev                        # http://localh
   - name/DOB match against the document
   - country risk and expected volume
 
-  Any non-clear check makes the case medium or high risk.
+  These are stand-ins for vendor screening and document verification; the lists and thresholds are illustrative.
+  The results roll up into a screening result: any `fail` is a **Hit**, any `review` is **Flagged**, otherwise
+  **Clear** (stored as `risk_tier` high/medium/low). It is a screening summary, not a customer risk rating.
 - **The model does what code can't:**
   - Does the occupation fit the expected volume?
   - Is the source of funds evasive?
@@ -61,7 +63,7 @@ cd frontend && npm install && npm run dev                        # http://localh
   - Is the applicant trying to instruct the reviewer?
 - **The API, not the model, decides** (`backend/kyc/rules.py`). A case is auto-cleared only when *all* of these hold:
   - every check is clear
-  - the risk tier is low
+  - the screening result is Clear
   - the model recommends approve with confidence ≥ threshold (0.9 by default)
   - there are no risk flags
   - no instruction-like text appears in applicant fields

@@ -31,6 +31,7 @@ class AgentConfig:
 
 VERSIONS: dict[str, AgentConfig] = {
     "v1": AgentConfig("v1", "v1.md"),
+    "v2": AgentConfig("v2", "v2.md", fence_untrusted=True),
 }
 DEPLOYED_VERSION = "v1"
 

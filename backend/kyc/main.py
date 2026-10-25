@@ -213,7 +213,7 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
                  "all": []}.get(tab)
         if where is None:
             raise HTTPException(422, "unknown tab")
-        order = [A.decided_at.desc()] if tab in ("decided", "auto_cleared", "qa") else [A.received_at]
+        order = [A.decided_at.desc()] if tab in ("decided", "auto_cleared", "qa") else [A.received_at.desc()]
         if tab == "qa":
             order.insert(0, (A.qa_status != "pending"))
         apps = list(db.scalars(select(A).where(*where).order_by(*order).limit(300)))

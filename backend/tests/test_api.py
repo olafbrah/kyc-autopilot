@@ -81,6 +81,7 @@ def test_human_flow_with_four_eyes(client, as_user, ingest):
     client.post(f"/api/applications/{cleared}/ai-review", headers=as_user("svc-kyc-agent"), json=GOOD)
     decided = client.get("/api/applications?tab=decided", headers=as_user("alice")).json()["items"]
     assert [a["id"] for a in decided] == [app_id]
+    assert client.get("/api/applications?tab=decided", headers=as_user("alice")).json()["total"] == 1
 
 
 def test_shadow_mode_never_auto_clears_and_kill_switch_routes_to_humans(client, as_user, ingest):

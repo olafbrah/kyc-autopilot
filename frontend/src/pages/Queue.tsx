@@ -22,15 +22,17 @@ export default function Queue() {
   const [items, setItems] = useState<Row[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [qaPending, setQaPending] = useState(0);
+  const [total, setTotal] = useState(0);
   const [stats, setStats] = useState<Stats | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     const [list, s] = await Promise.all([
-      api<{ items: Row[]; counts: Record<string, number>; qa_pending: number }>(`/api/applications?tab=${tab}`),
+      api<{ items: Row[]; counts: Record<string, number>; qa_pending: number; total: number }>(`/api/applications?tab=${tab}`),
       api<Stats>("/api/agent/stats"),
     ]);
     setItems(list.items);
+    setTotal(list.total);
     setCounts(list.counts);
     setQaPending(list.qa_pending);
     setStats(s);
@@ -90,6 +92,7 @@ export default function Queue() {
             </button>
           ))}
         </div>
+        <div className="table-wrap">
         <table className="table">
           <thead>
             <tr>
@@ -137,8 +140,9 @@ export default function Queue() {
             ))}
           </tbody>
         </table>
+        </div>
         <div className="panel-foot">
-          Showing {items.length} of {TABS.find((t) => t.key === tab)?.count?.(counts, qaPending) ?? items.length} results
+          Showing {items.length} of {total} results
         </div>
       </div>
     </>

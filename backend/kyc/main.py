@@ -208,7 +208,8 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
         apps = list(db.scalars(select(A).where(*where).order_by(order).limit(300)))
         reviews = latest_reviews(db, [a.id for a in apps])
         counts = dict(db.execute(select(A.status, func.count()).group_by(A.status)).all())
-        return {"items": [row(a, reviews.get(a.id)) for a in apps], "counts": counts,
+        total = db.scalar(select(func.count()).select_from(A).where(*where))
+        return {"items": [row(a, reviews.get(a.id)) for a in apps], "counts": counts, "total": total,
                 "qa_pending": db.scalar(select(func.count()).select_from(A).where(A.qa_status == "pending"))}
 
     @app.get("/api/applications/{app_id}")

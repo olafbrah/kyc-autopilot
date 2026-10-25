@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import { can, useMe } from "../App";
-import type { Row, Stats } from "../types";
+import type { Me, Row, Stats } from "../types";
 import { REASON_LABEL, StatusBadge, TierBadge, Stat, ago, pct } from "../ui";
 
 const TABS: { key: string; label: string; count?: (c: Record<string, number>, qa: number) => number }[] = [
@@ -55,6 +55,17 @@ export default function Queue() {
   const human = (counts.needs_review ?? 0) + (counts.in_review ?? 0) + (counts.pending_approval ?? 0);
   return (
     <>
+      <div className="page-head">
+        <div>
+          <h1>Review queue</h1>
+          <p className="lede">The agent clears low-risk applicants. Everything it isn't sure about lands here.</p>
+        </div>
+      {can(me, "agent:admin") && (
+        <button className="primary" onClick={simulate} disabled={busy}>
+          {busy ? "Sending…" : "Simulate 20 new applicants"}
+        </button>
+      )}
+      </div>
       <section className="stats">
         <Stat label="Auto-cleared by agent" value={pct(stats?.auto_clear_rate)} hint={`${stats?.auto_cleared ?? 0} of ${stats?.auto_mode_reviews ?? 0} reviewed`} />
         <Stat label="In the human queue" value={human} hint={`${counts.needs_review ?? 0} unclaimed`} />
@@ -64,67 +75,82 @@ export default function Queue() {
           value={stats?.median_minutes_to_decision.auto != null ? `${stats.median_minutes_to_decision.auto} min` : "–"}
           hint={`humans: ${stats?.median_minutes_to_decision.human != null ? stats.median_minutes_to_decision.human + " min" : "–"}`}
         />
-        {can(me, "agent:admin") && (
-          <button className="primary" onClick={simulate} disabled={busy}>
-            {busy ? "Sending…" : "Simulate 20 new applicants"}
-          </button>
-        )}
       </section>
 
-      <div className="tabs">
-        {TABS.map((t) => (
-          <button key={t.key} className={t.key === tab ? "tab active" : "tab"} onClick={() => setParams({ tab: t.key })}>
-            {t.label}
-            {t.count && <span className="count">{t.count(counts, qaPending)}</span>}
-          </button>
-        ))}
-      </div>
-
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Applicant</th>
-            <th>Nationality</th>
-            <th>Risk</th>
-            <th>Agent</th>
-            <th>Status</th>
-            <th>Assignee</th>
-            <th>Received</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.length === 0 && (
-            <tr>
-              <td colSpan={7} className="empty">Nothing here.</td>
-            </tr>
-          )}
-          {items.map((r) => (
-            <tr key={r.id}>
-              <td>
-                <Link to={`/applications/${r.id}`}>{r.full_name}</Link>
-                <div className="muted small">{r.external_id}</div>
-              </td>
-              <td>{r.nationality}</td>
-              <td><TierBadge tier={r.risk_tier} /></td>
-              <td>
-                {!r.ai ? (
-                  <span className="muted">–</span>
-                ) : r.ai.recommendation === "approve" ? (
-                  <span>Approve <span className="muted small">{pct(r.ai.confidence)}</span></span>
-                ) : (
-                  <span className="escalated">Escalated: {REASON_LABEL[r.ai.escalation_reason ?? "other"] ?? r.ai.escalation_reason}</span>
-                )}
-              </td>
-              <td>
-                <StatusBadge status={r.status} />
-                {r.qa_status && <span className="muted small"> QA {r.qa_status}</span>}
-              </td>
-              <td>{r.assignee ?? <span className="muted">–</span>}</td>
-              <td className="muted">{ago(r.received_at)}</td>
-            </tr>
+      <div className="panel">
+        <div className="panel-head">
+          <h2>Applications</h2>
+          <span className="live"><i className="dot dot-green" />Live</span>
+        </div>
+        <div className="tabs">
+          {TABS.map((t) => (
+            <button key={t.key} className={t.key === tab ? "tab active" : "tab"} onClick={() => setParams({ tab: t.key })}>
+              {t.label}
+              {t.count && <span className="count">{t.count(counts, qaPending)}</span>}
+            </button>
           ))}
-        </tbody>
-      </table>
+        </div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Applicant</th>
+              <th>Nationality</th>
+              <th>Risk</th>
+              <th>Status</th>
+              <th>Agent</th>
+              <th>Assignee</th>
+              <th>Received</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={8} className="empty">Nothing here.</td>
+              </tr>
+            )}
+            {items.map((r) => (
+              <tr key={r.id}>
+                <td>
+                  <Link className="name" to={`/applications/${r.id}`}>{r.full_name}</Link>
+                  <div className="sub">{r.external_id}</div>
+                </td>
+                <td>{r.nationality}</td>
+                <td><TierBadge tier={r.risk_tier} /></td>
+                <td>
+                  <StatusBadge status={r.status} />
+                  {r.qa_status && <div className="sub">QA {r.qa_status}</div>}
+                </td>
+                <td className="soft">
+                  {!r.ai ? (
+                    "–"
+                  ) : r.ai.recommendation === "approve" ? (
+                    <>Approve · {pct(r.ai.confidence)}</>
+                  ) : (
+                    <>Escalated · {REASON_LABEL[r.ai.escalation_reason ?? "other"] ?? r.ai.escalation_reason}</>
+                  )}
+                </td>
+                <td className="soft">{r.assignee ?? "–"}</td>
+                <td className="soft">{ago(r.received_at)}</td>
+                <td>{action(r, me)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="panel-foot">
+          Showing {items.length} of {TABS.find((t) => t.key === tab)?.count?.(counts, qaPending) ?? items.length} results
+        </div>
+      </div>
     </>
   );
+}
+
+function action(r: Row, me: Me) {
+  const label =
+    r.status === "needs_review" ? "Review case"
+    : r.status === "pending_approval" && can(me, "kyc:approve") && r.proposed_by !== me.sub ? "Approve"
+    : r.status === "in_review" && r.assignee === me.sub ? "Continue"
+    : r.qa_status === "pending" && can(me, "kyc:qa") ? "QA check"
+    : null;
+  return label ? <Link className="btn-outline" to={`/applications/${r.id}`}>{label}</Link> : <span className="none">No action needed</span>;
 }

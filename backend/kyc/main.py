@@ -1,4 +1,5 @@
 """KYC review API. Business logic lives here; auth is kyc/auth.py, audit is kyc/audit.py, the AI rule is kyc/rules.py."""
+import hmac
 import json
 import logging
 import random
@@ -183,7 +184,8 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
     def token(client_id: str = Form(...), client_secret: str = Form(...)):
         """OAuth client-credentials for service identities (the agent worker)."""
         user = app.state.policy.user(client_id)
-        if not user or not user.service or settings.service_clients.get(client_id) != client_secret:
+        expected = settings.service_clients.get(client_id) or ""
+        if not user or not user.service or not expected or not hmac.compare_digest(expected.encode(), client_secret.encode()):
             raise HTTPException(401, "invalid client")
         return {"access_token": issue_token(settings.jwt_secret, client_id, ttl=3600), "token_type": "bearer"}
 

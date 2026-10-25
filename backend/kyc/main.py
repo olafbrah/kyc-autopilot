@@ -19,7 +19,7 @@ from .auth import COOKIE, Policy, User, current_user, issue_token, require
 from .checks import run_checks
 from .config import Settings
 from .db import init_db, make_engine
-from .models import (AGENT_MODES, DECISIONS, FINAL, AgentSettings, AiReview, Application, AuditEvent, Job, utcnow)
+from .models import (AGENT_MODES, DECISIONS, AgentSettings, AiReview, Application, AuditEvent, Job, utcnow)
 from .rules import auto_clear_blockers
 
 log = logging.getLogger("kyc")
@@ -199,7 +199,7 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
                  "pending_approval": [A.status == "pending_approval"],
                  "auto_cleared": [A.status == "auto_cleared"],
                  "qa": [A.qa_status.is_not(None)],
-                 "decided": [A.status.in_(FINAL)],
+                 "decided": [A.status.in_(["approved", "rejected"])],
                  "agent": [A.status == "new"],
                  "all": []}.get(tab)
         if where is None:

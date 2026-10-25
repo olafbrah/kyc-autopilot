@@ -77,6 +77,10 @@ def test_human_flow_with_four_eyes(client, as_user, ingest):
     actions = [e["action"] for e in history(client, as_user, app_id)]
     assert actions == ["application.ingest", "application.ai_review", "application.claim", "application.propose",
                        "control.four_eyes_violation", "application.approve"]
+    cleared = ingest("clean")
+    client.post(f"/api/applications/{cleared}/ai-review", headers=as_user("svc-kyc-agent"), json=GOOD)
+    decided = client.get("/api/applications?tab=decided", headers=as_user("alice")).json()["items"]
+    assert [a["id"] for a in decided] == [app_id]
 
 
 def test_shadow_mode_never_auto_clears_and_kill_switch_routes_to_humans(client, as_user, ingest):

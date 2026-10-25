@@ -1,0 +1,18 @@
+# Who can do what. In production, users and roles come from the IdP (Entra ID / Okta groups);
+# this file is the dev stand-in and the single place permissions are defined.
+roles:
+  analyst: [kyc:read, kyc:work]
+  lead: [kyc:read, kyc:work, kyc:approve, kyc:qa, agent:admin]
+  # The AI agent: it can read cases, lease jobs and submit reviews. It cannot claim, propose, approve or reject.
+  agent: [kyc:read, agent:work]
+  # Upstream onboarding system pushing new applicants.
+  onboarding: [kyc:intake]
+
+users:
+  alice: {name: Alice Chen, roles: [analyst]}
+  bob: {name: Bob Ruiz, roles: [analyst]}
+  carol: {name: Carol Singh, roles: [lead]}
+  frank: {name: Frank Weber, roles: [lead]}
+  erin: {name: Erin Park, roles: []}
+  svc-kyc-agent: {name: KYC Agent (AI), roles: [agent], service: true}
+  svc-onboarding: {name: Onboarding system, roles: [onboarding], service: true}

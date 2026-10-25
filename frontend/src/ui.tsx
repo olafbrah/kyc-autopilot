@@ -26,7 +26,7 @@ export const REASON_LABEL: Record<string, string> = {
 
 export function blockerLabel(b: string): string {
   if (b.startsWith("check:")) return `Check not clear: ${b.slice(6).replace(/_/g, " ")}`;
-  if (b.startsWith("risk_tier")) return `Risk tier ${b.split(":")[1] ?? ""}`.trim();
+  if (b.startsWith("risk_tier")) return `Screening: ${SCREENING_LABEL[b.split(":")[1]] ?? b.split(":")[1] ?? ""}`;
   if (b.startsWith("ai_escalated:")) return `Agent escalated: ${REASON_LABEL[b.slice(13)] ?? b.slice(13)}`;
   return (
     { low_confidence: "Agent confidence below threshold", ai_risk_flags: "Agent raised risk flags", injection_suspected: "Instructions found in applicant text" }[b] ?? b
@@ -41,8 +41,11 @@ export function StatusBadge({ status }: { status: string }) {
   return <Badge kind={status}>{STATUS_LABEL[status] ?? status}</Badge>;
 }
 
-export function TierBadge({ tier }: { tier: string }) {
-  return <Badge kind={`tier-${tier}`}>{tier}</Badge>;
+// risk_tier is a roll-up of the automated checks, not a customer risk rating, so the UI shows it as a screening result.
+export const SCREENING_LABEL: Record<string, string> = { low: "Clear", medium: "Flagged", high: "Hit" };
+
+export function ScreeningBadge({ tier }: { tier: string }) {
+  return <Badge kind={`tier-${tier}`}>{SCREENING_LABEL[tier] ?? tier}</Badge>;
 }
 
 export const pct = (x: number | null | undefined, digits = 0) => (x == null ? "–" : `${(x * 100).toFixed(digits)}%`);

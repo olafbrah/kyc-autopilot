@@ -387,7 +387,7 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
         s.updated_by, s.updated_at = user.sub, utcnow()
         record(db, user, "agent.settings", s, before)
         if s.mode == "off":  # kill switch: everything waiting on the agent goes to humans now
-            for a in db.scalars(select(Application).where(Application.status == "new")):
+            for a in db.scalars(select(Application).where(Application.status == "new").with_for_update()):
                 b = snapshot(a)
                 a.status = "needs_review"
                 record(db, user, "application.kill_switch", a, b)

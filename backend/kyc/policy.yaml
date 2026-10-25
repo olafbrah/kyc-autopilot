@@ -3,8 +3,8 @@
 roles:
   analyst: [kyc:read, kyc:work]
   lead: [kyc:read, kyc:work, kyc:approve, kyc:qa, agent:admin]
-  # The AI agent: it can read cases, lease jobs and submit reviews. It cannot claim, propose, approve or reject.
-  agent: [kyc:read, agent:work]
+  # The AI agent: it can lease jobs (masked case data) and submit reviews. It cannot claim, propose, approve or reject.
+  agent: [agent:work]
   # Upstream onboarding system pushing new applicants.
   onboarding: [kyc:intake]
 

@@ -77,7 +77,7 @@ cd frontend && npm install && npm run dev                        # http://localh
 
 ## Auth
 
-- **Humans** sign in through a dev persona picker that sets a signed JWT in an httpOnly cookie. It is disabled with `DEV_LOGIN=0`.
+- **Humans** sign in through a dev persona picker that sets a signed JWT in an httpOnly cookie. It is disabled with `DEV_LOGIN=0`; the API then refuses to start unless `JWT_SECRET` and `SERVICE_CLIENTS` are set to non-default values. Set `COOKIE_SECURE=1` when serving over HTTPS.
 - **The agent worker** is a service identity (`svc-kyc-agent`). It gets a token through OAuth client-credentials (`POST /api/auth/token`). It has **no database access**: it can only lease a case and submit a review through the API.
 - **Permissions** come from roles in `backend/kyc/policy.yaml`. Every route declares a permission, and a test fails if any non-public route lacks one.
 - **For production,** swap `auth.py` for OIDC (Entra ID / Okta): validate the IdP token against its JWKS and map groups to the same roles. Routes and tests don't change.

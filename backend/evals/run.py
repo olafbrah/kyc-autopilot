@@ -19,6 +19,7 @@ from pathlib import Path
 from kyc.agent.agent import DEPLOYED_VERSION, get_config, model_error_review, review
 from kyc.agent.llm import OpenAICompatible, ReplayLLM, SimulatedLLM
 from kyc.checks import run_checks
+from kyc.main import mask_applicant
 from kyc.rules import auto_clear_blockers
 from kyc.synth import dataset
 
@@ -55,7 +56,7 @@ def score_case(llm, cfg, case: dict) -> dict:
     a = case["applicant"]
     checks, tier = run_checks(a, AS_OF)
     try:
-        rv = review(llm, cfg, a, checks, tier)
+        rv = review(llm, cfg, mask_applicant(a), checks, tier)  # same view of the case the deployed agent gets
     except KeyError:
         raise
     except Exception as e:  # noqa: BLE001

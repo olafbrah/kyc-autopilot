@@ -5,7 +5,7 @@
  "prompt": "v1.md",
  "threshold": 0.9,
  "deployed": true,
- "created_at": "2026-10-25T02:44:54+00:00",
+ "created_at": "2026-10-25T03:30:06+00:00",
  "metrics": {
   "dev": {
    "cases": 200,
@@ -150,7 +150,7 @@
    "model_reason": null,
    "confidence": 0.81,
    "summary": "Simulated review: all checks clear, profile consistent.",
-   "cost_usd": 0.000378,
+   "cost_usd": 0.000376,
    "latency_ms": 0,
    "name": "Carmen Fernandez"
   },
@@ -168,7 +168,7 @@
    "model_reason": null,
    "confidence": 0.96,
    "summary": "Simulated review: all checks clear, profile consistent.",
-   "cost_usd": 0.000388,
+   "cost_usd": 0.000386,
    "latency_ms": 0,
    "name": "Amelia Hughes"
   },
@@ -188,7 +188,7 @@
    "model_reason": null,
    "confidence": 0.6,
    "summary": "Simulated review: all checks clear, profile consistent.",
-   "cost_usd": 0.00039,
+   "cost_usd": 0.000388,
    "latency_ms": 0,
    "name": "Maria Thomas"
   },
@@ -208,7 +208,7 @@
    "model_reason": "profile",
    "confidence": 0.93,
    "summary": "Simulated review: escalate (profile).",
-   "cost_usd": 0.000374,
+   "cost_usd": 0.000371,
    "latency_ms": 0,
    "name": "Pablo Ruiz"
   },
@@ -228,7 +228,7 @@
    "model_reason": null,
    "confidence": 0.76,
    "summary": "Simulated review: all checks clear, profile consistent.",
-   "cost_usd": 0.000377,
+   "cost_usd": 0.000374,
    "latency_ms": 0,
    "name": "Julia Silva"
   },
@@ -248,7 +248,7 @@
    "model_reason": null,
    "confidence": 0.67,
    "summary": "Simulated review: all checks clear, profile consistent.",
-   "cost_usd": 0.000375,
+   "cost_usd": 0.000372,
    "latency_ms": 0,
    "name": "Amara Bello"
   },
@@ -268,7 +268,7 @@
    "model_reason": null,
    "confidence": 0.61,
    "summary": "Simulated review: all checks clear, profile consistent.",
-   "cost_usd": 0.000379,
+   "cost_usd": 0.000376,
    "latency_ms": 0,
    "name": "Gabriel Costa"
   },
@@ -288,7 +288,7 @@
    "model_reason": "profile",
    "confidence": 0.98,
    "summary": "Simulated review: escalate (profile).",
-   "cost_usd": 0.000374,
+   "cost_usd": 0.000371,
    "latency_ms": 0,
    "name": "Ananya Sharma"
   },
@@ -308,7 +308,7 @@
    "model_reason": null,
    "confidence": 0.76,
    "summary": "Simulated review: all checks clear, profile consistent.",
-   "cost_usd": 0.000376,
+   "cost_usd": 0.000374,
    "latency_ms": 0,
    "name": "Amara Bello"
   },
@@ -326,7 +326,7 @@
    "model_reason": null,
    "confidence": 0.96,
    "summary": "Simulated review: all checks clear, profile consistent.",
-   "cost_usd": 0.000388,
+   "cost_usd": 0.000384,
    "latency_ms": 0,
    "name": "Rohan Nair"
   }

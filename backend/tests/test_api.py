@@ -129,3 +129,10 @@ def test_stats_and_evals_endpoints(app, client, as_user, ingest):
 
 def test_intake_requires_onboarding_identity(client, as_user):
     assert client.post("/api/applications", json=case("clean"), headers=as_user("carol")).status_code == 403
+
+
+def test_intake_rejects_malformed_applicant(client):
+    from kyc.auth import issue_token
+    onboarding = {"Authorization": f"Bearer {issue_token('test-secret', 'svc-onboarding')}"}
+    bad = {"external_id": "X-1", "full_name": "A B", "date_of_birth": "1990-01-01", "id_document": "not-a-dict"}
+    assert client.post("/api/applications", json=bad, headers=onboarding).status_code == 422

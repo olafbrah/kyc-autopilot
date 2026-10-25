@@ -84,6 +84,6 @@ def review(llm, cfg: AgentConfig, applicant: dict, checks: dict, risk_tier: str)
 def model_error_review(cfg: AgentConfig, error: str) -> dict:
     """Fail safe: provider error -> the case goes to a human untriaged."""
     return {"recommendation": "escalate", "escalation_reason": "other", "confidence": 0.0,
-            "summary": f"Agent could not review this case ({error[:120]}); sent to a human.", "reasons": [],
+            "summary": "Agent could not review this case (model error); sent to a human.", "reasons": [],
             "risk_flags": ["model_error"], "agent_version": cfg.version, "model": cfg.model, "input_hash": "",
             "latency_ms": 0, "cost_usd": 0.0}

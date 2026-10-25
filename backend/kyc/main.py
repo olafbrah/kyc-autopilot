@@ -11,6 +11,7 @@ from fastapi import Body, Depends, FastAPI, Form, HTTPException, Response
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import func, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from . import synth
@@ -99,6 +100,11 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
                            nationality=applicant.get("nationality", ""), applicant=applicant, checks=checks,
                            risk_tier=tier, status="new")
         db.add(app_)
+        try:
+            db.flush()
+        except IntegrityError:  # a concurrent delivery of the same external_id won the insert
+            db.rollback()
+            return db.scalar(select(Application).where(Application.external_id == applicant["external_id"]))
         if agent_settings(db).mode == "off":
             app_.status = "needs_review"
         record(db, actor, "application.ingest", app_, {}, details={"risk_tier": tier})
@@ -121,8 +127,8 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
     app.state.settings, app.state.policy = settings, Policy.load(settings.policy_path)
     app.state.SessionLocal, app.state.ingest = SessionLocal, ingest
 
-    def load(db: Session, app_id: int) -> Application:
-        a = db.get(Application, app_id)
+    def load(db: Session, app_id: int, lock: bool = False) -> Application:
+        a = db.get(Application, app_id, with_for_update=lock)
         if not a:
             raise HTTPException(404, "application not found")
         return a
@@ -169,7 +175,8 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
         user = app.state.policy.user(sub)
         if not settings.dev_login or user is None or user.service:
             raise HTTPException(400, "unknown persona")
-        response.set_cookie(COOKIE, issue_token(settings.jwt_secret, sub), httponly=True, samesite="lax")
+        response.set_cookie(COOKIE, issue_token(settings.jwt_secret, sub), httponly=True, samesite="lax",
+                            secure=settings.cookie_secure)
         return {"sub": sub}
 
     @app.post("/api/auth/token")
@@ -204,8 +211,10 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
                  "all": []}.get(tab)
         if where is None:
             raise HTTPException(422, "unknown tab")
-        order = A.decided_at.desc() if tab in ("decided", "auto_cleared", "qa") else A.received_at
-        apps = list(db.scalars(select(A).where(*where).order_by(order).limit(300)))
+        order = [A.decided_at.desc()] if tab in ("decided", "auto_cleared", "qa") else [A.received_at]
+        if tab == "qa":
+            order.insert(0, (A.qa_status != "pending"))
+        apps = list(db.scalars(select(A).where(*where).order_by(*order).limit(300)))
         reviews = latest_reviews(db, [a.id for a in apps])
         counts = dict(db.execute(select(A.status, func.count()).group_by(A.status)).all())
         total = db.scalar(select(func.count()).select_from(A).where(*where))
@@ -232,12 +241,16 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
         for f in ("external_id", "full_name", "date_of_birth", "id_document"):
             if not applicant.get(f):
                 raise HTTPException(422, f"missing field: {f}")
-        a = ingest(db, applicant, actor=user)
+        try:
+            a = ingest(db, applicant, actor=user)
+        except (TypeError, ValueError, AttributeError, KeyError) as e:
+            db.rollback()
+            raise HTTPException(422, f"invalid applicant data: {type(e).__name__}") from None
         return {"id": a.id, "status": a.status, "risk_tier": a.risk_tier}
 
     @app.post("/api/applications/{app_id}/claim")
     def claim(app_id: int, user: User = Depends(require("kyc:work")), db: Session = Depends(get_db)):
-        a = load(db, app_id)
+        a = load(db, app_id, lock=True)
         expect(a, "needs_review")
         before = snapshot(a)
         a.status, a.assignee = "in_review", user.sub
@@ -324,7 +337,7 @@ def build_app(settings: Settings | None = None, rng: random.Random | None = None
     def ai_review(app_id: int, body: ReviewIn, user: User = Depends(require("agent:work")),
                   db: Session = Depends(get_db)):
         """The agent submits its review; the API, not the agent, decides whether the case may be auto-cleared."""
-        a = load(db, app_id)
+        a = load(db, app_id, lock=True)  # serialises with the kill switch and duplicate submissions
         expect(a, "new")
         if body.recommendation not in ("approve", "escalate"):
             raise HTTPException(422, "recommendation must be approve or escalate")

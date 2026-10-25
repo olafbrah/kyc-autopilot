@@ -1,0 +1,27 @@
+{
+  "_note": "Fictional names. Stand-in for a sanctions/PEP screening vendor (e.g. a consolidated OFAC/UN/EU/UK list).",
+  "sanctions": [
+    {"name": "Viktor Aleksandrovich Morozov", "dob": "1968-03-14", "country": "RU", "list": "OFAC SDN"},
+    {"name": "Hamid Reza Tavakoli", "dob": "1971-11-02", "country": "IR", "list": "UN 1737"},
+    {"name": "Kim Chol Jin", "dob": "1979-06-21", "country": "KP", "list": "UN 1718"},
+    {"name": "Dmitri Pavel Sokolov", "dob": "1975-09-30", "country": "RU", "list": "EU 269/2014"},
+    {"name": "Aung Min Htet", "dob": "1966-01-17", "country": "MM", "list": "OFAC SDN"},
+    {"name": "Bashir Al-Khatib", "dob": "1970-05-08", "country": "SY", "list": "UK HMT"},
+    {"name": "Elena Viktorovna Kuznetsova", "dob": "1982-12-03", "country": "RU", "list": "OFAC SDN"},
+    {"name": "Omar Farouk Haddad", "dob": "1977-07-19", "country": "LB", "list": "OFAC SDN"},
+    {"name": "Nikolai Ivanovich Petrenko", "dob": "1964-04-25", "country": "BY", "list": "EU 765/2006"},
+    {"name": "Carlos Eduardo Mendoza Rivas", "dob": "1973-08-11", "country": "VE", "list": "OFAC SDN"},
+    {"name": "Yusuf Abdullahi Warsame", "dob": "1980-02-28", "country": "SO", "list": "UN 751"},
+    {"name": "Li Wenhao", "dob": "1985-10-09", "country": "CN", "list": "OFAC SDN"}
+  ],
+  "pep": [
+    {"name": "Margarethe Albrecht", "dob": "1961-06-04", "country": "DE", "position": "Former state finance minister"},
+    {"name": "Rafael Antonio Quintero", "dob": "1958-09-22", "country": "CO", "position": "Senator"},
+    {"name": "Adebayo Ogunleye", "dob": "1963-03-30", "country": "NG", "position": "State governor"},
+    {"name": "Priya Raghunathan", "dob": "1969-12-15", "country": "IN", "position": "Member of parliament"},
+    {"name": "Jean-Luc Moreau", "dob": "1955-01-27", "country": "FR", "position": "Central bank board member"},
+    {"name": "Sofia Lindqvist", "dob": "1972-07-07", "country": "SE", "position": "Deputy minister of defence"},
+    {"name": "Tomasz Wieczorek", "dob": "1966-05-19", "country": "PL", "position": "Head of state-owned energy company"},
+    {"name": "Hassan Al-Mansouri", "dob": "1960-10-01", "country": "AE", "position": "Ambassador"}
+  ]
+}

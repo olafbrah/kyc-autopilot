@@ -1,0 +1,42 @@
+# Postgres + API (serves the React build) + agent workers. No Redis: the job queue is a Postgres table.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kyc
+      POSTGRES_PASSWORD: kyc
+      POSTGRES_DB: kyc
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kyc"]
+      interval: 2s
+      retries: 30
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://kyc:kyc@db:5432/kyc
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me}
+      SERVICE_CLIENTS: svc-kyc-agent=${AGENT_CLIENT_SECRET:-dev-agent-secret}
+      SEED_DEMO: ${SEED_DEMO:-40}
+    ports: ["8000:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+
+  worker:
+    build: .
+    command: ["python", "-m", "kyc.worker"]
+    environment:
+      API_URL: http://api:8000
+      AGENT_CLIENT_SECRET: ${AGENT_CLIENT_SECRET:-dev-agent-secret}
+      LLM_BACKEND: ${LLM_BACKEND:-simulated}   # set to openai and provide OPENAI_API_KEY for a real model
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      MODEL: ${MODEL:-}
+      CONCURRENCY: "4"
+    depends_on: [api]
+    deploy:
+      replicas: ${WORKERS:-2}
+    restart: unless-stopped
+
+volumes:
+  pgdata:
